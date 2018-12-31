@@ -1,6 +1,7 @@
 <template>
   <div v-show="active" @mouseup="objectSelected()">
     <div id="shape-buttons">
+      <button class="shape-btn line" @click="addLine()">Line</button>
       <button class="shape-btn rectangle" @click="addRect()">Rectangle</button>
       <button class="shape-btn circle" @click="addCircle()">Circle</button>
       <button class="shape-btn triangle" @click="addTriangle()">Triangle</button>
@@ -159,6 +160,15 @@ export default {
     setActiveObject: function(obj){
       this.canvas.setActiveObject(obj);
       this.objectSelected();
+    },
+    addLine: function(){
+      var line = new fabric.Line([20,20,80,80], {
+        fill: '#00ffff',
+        stroke: '#00ffff',
+        strokeWidth: 2
+      });
+      this.canvas.add(line);
+      this.setActiveObject(line);
     },
     addRect: function() {
       var rect = new fabric.Rect({
