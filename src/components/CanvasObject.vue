@@ -1,58 +1,251 @@
 <template>
-  <div v-show="active" :class="canvasClass" @mouseup="objectSelected()">
+  <div v-show="active" @mouseup="objectSelected()">
+    <div id="shape-buttons">
+      <button class="shape-btn rectangle" @click="addRect()">Rectangle</button>
+      <button class="shape-btn circle" @click="addCircle()">Circle</button>
+      <button class="shape-btn triangle" @click="addTriangle()">Triangle</button>
+      <button class="shape-btn text" @click="addText()">Text</button>
+    </div>
     <canvas :id="'drawing'+object_id"></canvas>
+    <div id="object-controls">
+      <div id="shape-controls" v-show="control == 'shape'" ref="shapeControls">
+        <div>
+          <label for="fill-color">Fill color</label>
+          <input
+            type="color"
+            class="shape-ctrl"
+            id="fill-color"
+            @input="fillColor($event.target.value)"
+          >
+        </div>
+        <div>
+          <label for="border-color">Border color</label>
+          <input
+            type="color"
+            class="shape-ctrl"
+            id="border-color"
+            @input="borderColor($event.target.value)"
+          >
+        </div>
+        <div>
+          <label for="border-size">Border size</label>
+          <select class="text-ctrl" id="border-size" @input="borderSize($event.target.value)">
+            <option v-for="item in 20" :key="'border'+item">{{item}}</option>
+          </select>
+        </div>
+        <div>
+          <button id="bring-front" class="shape-ctrl" @click="bringToFront()">Bring to front</button>
+        </div>
+        <div>
+          <button id="send-back" class="shape-ctrl" @click="sendToBack()">Send to back</button>
+        </div>
+      </div>
+      <div id="text-controls" v-show="control == 'text'" ref="textControls">
+        <div>
+          <label for="font-size">Font size</label>
+          <select class="text-ctrl" id="font-size" @input="setFontSize($event.target.value)">
+            <option v-for="item in font_sizes" :key="'font'+item">{{item}}</option>
+          </select>
+        </div>
+        <div>
+          <label for="font-family">Font family</label>
+          <select class="text-ctrl" id="font-family" @input="setFontFamily($event.target.value)">
+            <option v-for="item in font_families" :key="'fontfamily'+item">{{item}}</option>
+          </select>
+        </div>
+        <div>
+          <label for="fill-color">Fill color</label>
+          <input
+            type="color"
+            class="shape-ctrl"
+            id="fill-color"
+            @input="fillColor($event.target.value)"
+          >
+        </div>
+        <div>
+          <button id="bring-front" class="shape-ctrl" @click="bringToFront()">Bring to front</button>
+        </div>
+        <div>
+          <button id="send-back" class="shape-ctrl" @click="sendToBack()">Send to back</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { fabric } from 'fabric';
+import { fabric } from "fabric";
 
 export default {
-  name: 'CanvasObject',
+  name: "CanvasObject",
   props: {
     object_id: String,
     canvas_width: Number,
     canvas_height: Number,
     active: Number
   },
-  data: function () {
-    return{
-      canvas: Object
-    }
+  data: function() {
+    return {
+      canvas: Object,
+      control: "none",
+      font_sizes: [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        16,
+        18,
+        20,
+        22,
+        24,
+        28,
+        32,
+        36,
+        40,
+        44,
+        48,
+        60,
+        72,
+        80,
+        90
+      ],
+      font_families: [
+        "Times New Roman",
+        "Arial",
+        "Comic Sans",
+        "Verdana",
+        "Courier New",
+        "Trebuchet MS",
+        "Book Antiqua",
+        "Georgia",
+        "Copperplate",
+        "Papyrus"
+      ]
+    };
   },
-  created: function () {
-  },
-  mounted: function () {
-      this.canvas = new fabric.Canvas('drawing'+this.object_id, {
-        width: this.canvas_width,
-        height: this.canvas_height,
-        backgroundColor: '#fff'
-      });
+  created: function() {},
+  mounted: function() {
+    this.canvas = new fabric.Canvas("drawing" + this.object_id, {
+      width: this.canvas_width,
+      height: this.canvas_height,
+      backgroundColor: "#fff"
+    });
   },
   methods: {
-    objectSelected: function(i) {
-        this.$emit('object_selected', this.canvas.getActiveObject());
-    }
-  },
-  computed: {
-    canvasClass: function () {
-      switch(this.object_id) {
-        case "c0":
-          return "canvas_blue"
-          break;
-        case "c1":
-          return "canvas_red"
-          break;
-        case "c2":
-          return "canvas_green"
-          break;
-        default:
-          return "canvas_black"
+    objectSelected: function() {
+      var active_object = this.canvas.getActiveObject();
+      if (!active_object){
+        this.control = "none";
+      } else if (["rect", "circle", "triangle"].includes(active_object.type)) {
+        this.control = "shape";
+        this.$refs.shapeControls.querySelector("#fill-color").value = active_object.fill;
+        this.$refs.shapeControls.querySelector("#border-color").value =
+          active_object.stroke;
+        this.$refs.shapeControls.querySelector("#border-size").value =
+          active_object.strokeWidth;
+      } else if ("i-text" == active_object.type) {
+        this.control = "text";
+        this.$refs.textControls.querySelector("#font-size").value =
+          active_object.fontSize;
+        this.$refs.textControls.querySelector("#font-family").value =
+          active_object.fontFamily;
+        this.$refs.textControls.querySelector("#fill-color").value = active_object.fill;
       }
-      return
+
+      this.$refs.textControls;
+    },
+    setActiveObject: function(obj){
+      this.canvas.setActiveObject(obj);
+      this.objectSelected();
+    },
+    addRect: function() {
+      var rect = new fabric.Rect({
+        fill: "#00ff00",
+        left: 20,
+        top: 20,
+        width: 90,
+        height: 60,
+        stroke: "#00ff00",
+        strokeWidth: 1
+      });
+      this.canvas.add(rect);
+      this.setActiveObject(rect);
+    },
+    addCircle: function() {
+      var circle = new fabric.Circle({
+        fill: "#ff0000",
+        radius: 50,
+        left: 20,
+        top: 20,
+        stroke: "#ff0000",
+        strokeWidth: 1
+      });
+      this.canvas.add(circle);
+      this.setActiveObject(circle);
+    },
+    addTriangle: function() {
+      var triangle = new fabric.Triangle({
+        fill: "#0000ff",
+        left: 20,
+        top: 20,
+        width: 60,
+        height: 60,
+        stroke: "#0000ff",
+        strokeWidth: 1
+      });
+      this.canvas.add(triangle);
+      this.setActiveObject(triangle);
+    },
+    addText: function() {
+      var text = new fabric.IText("your text here", {
+        fill: "#000000",
+        fontFamily: "Times New Roman",
+        fontSize: "14",
+        left: 20,
+        top: 20
+      });
+      this.canvas.add(text);
+      this.setActiveObject(text);
+    },
+    fillColor: function(color) {
+      var active_object = this.canvas.getActiveObject();
+      active_object.set("fill", color);
+      this.canvas.renderAll();
+    },
+    borderColor: function(color) {
+      var active_object = this.canvas.getActiveObject();
+      active_object.set("stroke", color);
+      this.canvas.renderAll();
+    },
+    borderSize: function(num) {
+      var active_object = this.canvas.getActiveObject();
+      active_object.set("strokeWidth", parseInt(num));
+      this.canvas.renderAll();
+    },
+    setFontSize: function(size) {
+      var active_object = this.canvas.getActiveObject();
+      active_object.set("fontSize", parseInt(size));
+      this.canvas.renderAll();
+    },
+    setFontFamily: function(family) {
+      var active_object = this.canvas.getActiveObject();
+      active_object.set("fontFamily", family);
+      this.canvas.renderAll();
+    },
+    bringToFront: function() {
+      var active_object = this.canvas.getActiveObject();
+      active_object.bringToFront(active_object);
+      this.canvas.renderAll();
+    },
+    sendToBack: function() {
+      var active_object = this.canvas.getActiveObject();
+      active_object.sendToBack(active_object);
+      this.canvas.renderAll();
     }
   }
-}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
