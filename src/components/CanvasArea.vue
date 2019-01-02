@@ -131,7 +131,7 @@ export default {
 .vue_component__upload--image {
   clear: both;
 }
-#existing-images {
+#library {
   clear: both;
 }
 #existing-images img {
