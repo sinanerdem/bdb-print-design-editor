@@ -133,13 +133,14 @@ export default {
       height: this.canvas_height,
       backgroundColor: "#fff"
     });
+    this.canvas.preserveObjectStacking = true;
   },
   methods: {
     objectSelected: function() {
       var active_object = this.canvas.getActiveObject();
       if (!active_object){
         this.control = "none";
-      } else if (["rect", "circle", "triangle"].includes(active_object.type)) {
+      } else if (["rect", "circle", "triangle", "line"].includes(active_object.type)) {
         this.control = "shape";
         this.$refs.shapeControls.querySelector("#fill-color").value = active_object.fill;
         this.$refs.shapeControls.querySelector("#border-color").value =
@@ -218,6 +219,14 @@ export default {
       });
       this.canvas.add(text);
       this.setActiveObject(text);
+    },
+    addImage: function(img){
+      var imgInstance = new fabric.Image(img, {
+        left: 20,
+        top: 20
+      });
+      this.canvas.add(imgInstance);
+      this.setActiveObject(imgInstance);
     },
     fillColor: function(color) {
       var active_object = this.canvas.getActiveObject();

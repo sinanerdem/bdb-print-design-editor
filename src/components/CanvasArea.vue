@@ -12,6 +12,12 @@
       :canvas_width="canvas_width"
       ref="canvasObjects"
     ></CanvasObject>
+    <div id="existing-images">
+      <img v-for="(item,index) in images" :key="'img'+index" :src="item" @click="onImageClicked">
+    </div>
+    <form id="image-upload">
+      <input type="file" @change="onFileChanged" ref="imageUpload">
+    </form>
   </div>
 </template>
 
@@ -34,7 +40,8 @@ export default {
       number_of_pages: 1,
       canvas_objects: [],
       canvas_activity: [],
-      active_canvas_id: 0
+      active_canvas_id: 0,
+      images: []
     };
   },
   created: function() {
@@ -49,6 +56,20 @@ export default {
   },
   mounted: function() {},
   methods: {
+    onFileChanged(event) {
+      var input = event.target;
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = e => {
+          this.images.push(e.target.result);
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    },
+    onImageClicked: function(event){
+      var img = event.target;
+      this.$refs.canvasObjects[this.active_canvas_id].addImage(img);
+    },
     selectPage: function(i) {
       for (var k = 0; k < this.number_of_pages; k++) {
         Vue.set(this.canvas_activity, k, 0);
@@ -87,13 +108,23 @@ export default {
   margin: 5px;
   float: left;
 }
-#object-controls div div{
+#object-controls div div {
   border-bottom: 1px solid #ccc;
   display: block;
   margin: 5px 0;
   padding: 10px 10px;
 }
-#object-controls label{
+#object-controls label {
   margin-right: 5px;
+}
+.vue_component__upload--image {
+  clear: both;
+}
+#existing-images {
+  clear: both;
+}
+#existing-images img {
+  border: 1px solid #ccc;
+  width: 100px;
 }
 </style>
