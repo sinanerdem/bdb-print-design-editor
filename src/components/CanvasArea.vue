@@ -12,12 +12,22 @@
       :canvas_width="canvas_width"
       ref="canvasObjects"
     ></CanvasObject>
-    <div id="existing-images">
-      <img v-for="(item,index) in images" :key="'img'+index" :src="item" @click="onImageClicked">
+    <div id="library">
+      <button id="library-btn" class="btn" @click="$modal.show('imageUpload')">Library</button>
+      <modal name="imageUpload">
+        <div id="existing-images">
+          <img
+            v-for="(item,index) in images"
+            :key="'img'+index"
+            :src="item"
+            @click="onImageClicked"
+          >
+        </div>
+        <form id="image-upload">
+          <input type="file" @change="onFileChanged" ref="imageUpload">
+        </form>
+      </modal>
     </div>
-    <form id="image-upload">
-      <input type="file" @change="onFileChanged" ref="imageUpload">
-    </form>
   </div>
 </template>
 
@@ -66,9 +76,10 @@ export default {
         reader.readAsDataURL(input.files[0]);
       }
     },
-    onImageClicked: function(event){
+    onImageClicked: function(event) {
       var img = event.target;
       this.$refs.canvasObjects[this.active_canvas_id].addImage(img);
+      this.$modal.hide('imageUpload')
     },
     selectPage: function(i) {
       for (var k = 0; k < this.number_of_pages; k++) {
@@ -126,5 +137,8 @@ export default {
 #existing-images img {
   border: 1px solid #ccc;
   width: 100px;
+}
+.v--modal-box{
+  padding: 15px !important;
 }
 </style>
