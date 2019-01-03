@@ -8,7 +8,7 @@
       <button class="shape-btn text" @click="addText()">Text</button>
     </div>
     <canvas :id="'drawing'+object_id"></canvas>
-    <div id="object-controls">
+    <div id="object-controls" v-show="control != 'none'">
       <div id="shape-controls" v-show="control == 'shape'" ref="shapeControls">
         <div>
           <label for="fill-color">Fill color</label>
@@ -34,12 +34,6 @@
             <option v-for="item in 20" :key="'border'+item">{{item}}</option>
           </select>
         </div>
-        <div>
-          <button id="bring-front" class="shape-ctrl" @click="bringToFront()">Bring to front</button>
-        </div>
-        <div>
-          <button id="send-back" class="shape-ctrl" @click="sendToBack()">Send to back</button>
-        </div>
       </div>
       <div id="text-controls" v-show="control == 'text'" ref="textControls">
         <div>
@@ -63,11 +57,16 @@
             @input="fillColor($event.target.value)"
           >
         </div>
+      </div>
+      <div id="common-controls">
         <div>
-          <button id="bring-front" class="shape-ctrl" @click="bringToFront()">Bring to front</button>
+          <button id="bring-front" class="common-ctrl" @click="bringToFront()">Bring to front</button>
         </div>
         <div>
-          <button id="send-back" class="shape-ctrl" @click="sendToBack()">Send to back</button>
+          <button id="send-back" class="common-ctrl" @click="sendToBack()">Send to back</button>
+        </div>
+        <div>
+          <button id="delete-item" class="common-ctrl" @click="deleteItem()">Delete</button>
         </div>
       </div>
     </div>
@@ -138,11 +137,14 @@ export default {
   methods: {
     objectSelected: function() {
       var active_object = this.canvas.getActiveObject();
-      if (!active_object){
+      if (!active_object) {
         this.control = "none";
-      } else if (["rect", "circle", "triangle", "line"].includes(active_object.type)) {
+      } else if (
+        ["rect", "circle", "triangle", "line"].includes(active_object.type)
+      ) {
         this.control = "shape";
-        this.$refs.shapeControls.querySelector("#fill-color").value = active_object.fill;
+        this.$refs.shapeControls.querySelector("#fill-color").value =
+          active_object.fill;
         this.$refs.shapeControls.querySelector("#border-color").value =
           active_object.stroke;
         this.$refs.shapeControls.querySelector("#border-size").value =
@@ -153,19 +155,20 @@ export default {
           active_object.fontSize;
         this.$refs.textControls.querySelector("#font-family").value =
           active_object.fontFamily;
-        this.$refs.textControls.querySelector("#fill-color").value = active_object.fill;
+        this.$refs.textControls.querySelector("#fill-color").value =
+          active_object.fill;
       }
 
       this.$refs.textControls;
     },
-    setActiveObject: function(obj){
+    setActiveObject: function(obj) {
       this.canvas.setActiveObject(obj);
       this.objectSelected();
     },
-    addLine: function(){
-      var line = new fabric.Line([20,20,80,80], {
-        fill: '#00ffff',
-        stroke: '#00ffff',
+    addLine: function() {
+      var line = new fabric.Line([20, 20, 80, 80], {
+        fill: "#00ffff",
+        stroke: "#00ffff",
         strokeWidth: 2
       });
       this.canvas.add(line);
@@ -220,7 +223,7 @@ export default {
       this.canvas.add(text);
       this.setActiveObject(text);
     },
-    addImage: function(img){
+    addImage: function(img) {
       var imgInstance = new fabric.Image(img, {
         left: 20,
         top: 20
@@ -262,6 +265,12 @@ export default {
       var active_object = this.canvas.getActiveObject();
       active_object.sendToBack(active_object);
       this.canvas.renderAll();
+    },
+    deleteItem: function() {
+      var active_object = this.canvas.getActiveObject();
+      this.canvas.remove(active_object);
+      this.canvas.renderAll();
+      this.control = 'none';
     }
   }
 };

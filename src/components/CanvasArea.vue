@@ -1,32 +1,37 @@
 <template>
   <div>
-    <div id="page-buttons">
-      <button v-for="i in number_of_pages" :key="i" @click="selectPage(i-1)">Page {{i}}</button>
-    </div>
-    <CanvasObject
-      v-for="(item,index) in canvas_objects"
-      :key="item"
-      :active="canvas_activity[index]"
-      :object_id="item"
-      :canvas_height="canvas_height"
-      :canvas_width="canvas_width"
-      ref="canvasObjects"
-    ></CanvasObject>
-    <div id="library">
-      <button id="library-btn" class="btn" @click="$modal.show('imageUpload')">Library</button>
-      <modal name="imageUpload">
-        <div id="existing-images">
-          <img
-            v-for="(item,index) in images"
-            :key="'img'+index"
-            :src="item"
-            @click="onImageClicked"
-          >
-        </div>
-        <form id="image-upload">
-          <input type="file" @change="onFileChanged" ref="imageUpload">
-        </form>
-      </modal>
+    <div
+      v-if="!(canvas_width && canvas_height && number_of_pages)"
+    >URL of this page should be like: "www.example.com/?width=800&amp;height=500&amp;pages=5"</div>
+    <div v-if="number_of_pages">
+      <div id="page-buttons">
+        <button v-for="i in number_of_pages" :key="i" @click="selectPage(i-1)">Page {{i}}</button>
+      </div>
+      <CanvasObject
+        v-for="(item,index) in canvas_objects"
+        :key="item"
+        :active="canvas_activity[index]"
+        :object_id="item"
+        :canvas_height="canvas_height"
+        :canvas_width="canvas_width"
+        ref="canvasObjects"
+      ></CanvasObject>
+      <div id="library">
+        <button id="library-btn" class="btn" @click="$modal.show('imageUpload')">Library</button>
+        <modal name="imageUpload">
+          <div id="existing-images">
+            <img
+              v-for="(item,index) in images"
+              :key="'img'+index"
+              :src="item"
+              @click="onImageClicked"
+            >
+          </div>
+          <form id="image-upload">
+            <input type="file" @change="onFileChanged" ref="imageUpload">
+          </form>
+        </modal>
+      </div>
     </div>
   </div>
 </template>
@@ -44,10 +49,10 @@ export default {
   },
   data: function() {
     return {
-      canvas_width: Number,
-      canvas_height: Number,
+      canvas_width: 1,
+      canvas_height: 1,
       control: String,
-      number_of_pages: 1,
+      number_of_pages: Number,
       canvas_objects: [],
       canvas_activity: [],
       active_canvas_id: 0,
@@ -58,13 +63,14 @@ export default {
     this.canvas_width = parseInt(getUrlVars()["width"]);
     this.canvas_height = parseInt(getUrlVars()["height"]);
     this.number_of_pages = parseInt(getUrlVars()["pages"]);
-    for (var i = 0; i < this.number_of_pages; i++) {
-      this.canvas_activity[i] = 0;
-      this.canvas_objects[i] = "c" + i;
+    if (this.number_of_pages) {
+      for (var i = 0; i < this.number_of_pages; i++) {
+        this.canvas_activity[i] = 0;
+        this.canvas_objects[i] = "c" + i;
+      }
+      this.canvas_activity[0] = 1;
     }
-    this.canvas_activity[0] = 1;
   },
-  mounted: function() {},
   methods: {
     onFileChanged(event) {
       var input = event.target;
@@ -79,7 +85,7 @@ export default {
     onImageClicked: function(event) {
       var img = event.target;
       this.$refs.canvasObjects[this.active_canvas_id].addImage(img);
-      this.$modal.hide('imageUpload')
+      this.$modal.hide("imageUpload");
     },
     selectPage: function(i) {
       for (var k = 0; k < this.number_of_pages; k++) {
@@ -138,7 +144,7 @@ export default {
   border: 1px solid #ccc;
   width: 100px;
 }
-.v--modal-box{
+.v--modal-box {
   padding: 15px !important;
 }
 </style>
