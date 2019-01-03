@@ -32,6 +32,20 @@
           </form>
         </modal>
       </div>
+      <div>
+        <button id="import" @click="$modal.show('importTemplate')">Templates</button>
+        <modal name="importTemplate">
+          <div id="templates">
+            <div
+              class="template_name"
+              v-for="(item,index) in template_names"
+              :key="'template_name'+index"
+              :src="item"
+              @click="onTemplateClicked(item)"
+            >{{item}}</div>
+          </div>
+        </modal>
+      </div>
     </div>
   </div>
 </template>
@@ -41,6 +55,8 @@ import Vue from "vue";
 import { getUrlVars } from "../common";
 import { fabric } from "fabric";
 import CanvasObject from "../components/CanvasObject.vue";
+import $ from 'jquery'
+window.$ = $
 
 export default {
   name: "CanvasArea",
@@ -56,7 +72,10 @@ export default {
       canvas_objects: [],
       canvas_activity: [],
       active_canvas_id: 0,
-      images: []
+      images: [],
+      template_location: "canvas_templates/kartvizit",
+      template_names: ["template1", "template2"],
+      templates: []
     };
   },
   created: function() {
@@ -86,6 +105,14 @@ export default {
       var img = event.target;
       this.$refs.canvasObjects[this.active_canvas_id].addImage(img);
       this.$modal.hide("imageUpload");
+    },
+    onTemplateClicked: function(name) {
+      var template_url = this.template_location + "/" + name + ".json";
+      var canvas = this.$refs.canvasObjects[this.active_canvas_id].canvas;
+      $.getJSON(template_url).done(function(data) {
+        canvas.loadFromJSON(data, canvas.renderAll.bind(canvas));
+      });
+      this.$modal.hide("importTemplate");
     },
     selectPage: function(i) {
       for (var k = 0; k < this.number_of_pages; k++) {
@@ -146,5 +173,11 @@ export default {
 }
 .v--modal-box {
   padding: 15px !important;
+}
+#templates .template_name{
+  cursor: pointer;
+  padding: 5px;
+  margin: 5px;
+  border: 1px solid #ccc;
 }
 </style>

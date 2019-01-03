@@ -31,7 +31,7 @@
         <div>
           <label for="border-size">Border size</label>
           <select class="text-ctrl" id="border-size" @input="borderSize($event.target.value)">
-            <option v-for="item in 20" :key="'border'+item">{{item}}</option>
+            <option v-for="item in 21" :key="'border'+(item-1)">{{item-1}}</option>
           </select>
         </div>
       </div>
