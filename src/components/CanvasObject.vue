@@ -30,7 +30,12 @@
         </div>
         <div>
           <label for="border-size">Border size</label>
-          <select class="text-ctrl" id="border-size" @input="borderSize($event.target.value)">
+          <select
+            class="text-ctrl"
+            id="border-size"
+            name="border-size"
+            @input="borderSize($event.target.value)"
+          >
             <option v-for="item in 21" :key="'border'+(item-1)">{{item-1}}</option>
           </select>
         </div>
@@ -38,13 +43,23 @@
       <div id="text-controls" v-show="control == 'text'" ref="textControls">
         <div>
           <label for="font-size">Font size</label>
-          <select class="text-ctrl" id="font-size" @input="setFontSize($event.target.value)">
+          <select
+            class="text-ctrl"
+            id="font-size"
+            name="font-size"
+            @input="setFontSize($event.target.value)"
+          >
             <option v-for="item in font_sizes" :key="'font'+item">{{item}}</option>
           </select>
         </div>
         <div>
           <label for="font-family">Font family</label>
-          <select class="text-ctrl" id="font-family" @input="setFontFamily($event.target.value)">
+          <select
+            class="text-ctrl"
+            id="font-family"
+            name="font-family"
+            @input="setFontFamily($event.target.value)"
+          >
             <option v-for="item in font_families" :key="'fontfamily'+item">{{item}}</option>
           </select>
         </div>
@@ -54,11 +69,25 @@
             type="color"
             class="shape-ctrl"
             id="fill-color"
+            name="fill-color"
             @input="fillColor($event.target.value)"
           >
         </div>
       </div>
-      <div id="common-controls">
+      <div id="common-controls" ref="commonControls">
+        <div>
+          <label for="opacity">Opacity</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="100"
+            name="opacity"
+            id="opacity"
+            class="common-ctrl"
+            @input="setOpacity($event.target.value)"
+          >
+        </div>
         <div>
           <button id="bring-front" class="common-ctrl" @click="bringToFront()">Bring to front</button>
         </div>
@@ -139,6 +168,7 @@ export default {
       var active_object = this.canvas.getActiveObject();
       if (!active_object) {
         this.control = "none";
+        return
       } else if (
         ["rect", "circle", "triangle", "line"].includes(active_object.type)
       ) {
@@ -158,8 +188,7 @@ export default {
         this.$refs.textControls.querySelector("#fill-color").value =
           active_object.fill;
       }
-
-      this.$refs.textControls;
+      this.$refs.commonControls.querySelector("#opacity").value = active_object.opacity*100;
     },
     setActiveObject: function(obj) {
       this.canvas.setActiveObject(obj);
@@ -270,7 +299,12 @@ export default {
       var active_object = this.canvas.getActiveObject();
       this.canvas.remove(active_object);
       this.canvas.renderAll();
-      this.control = 'none';
+      this.control = "none";
+    },
+    setOpacity: function(val) {
+      var active_object = this.canvas.getActiveObject();
+      active_object.set("opacity", parseInt(val) / 100);
+      this.canvas.renderAll();
     }
   }
 };
